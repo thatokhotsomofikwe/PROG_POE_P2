@@ -1,0 +1,205 @@
+﻿using PROG_POE_P2;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Media;
+
+namespace PROG_POE_P2
+{
+    public class ConversationManager
+    {
+        private string userName = "User";
+        private string botName = "A.J";
+
+        private string favouriteTopic = "";
+        private string lastTopic = "";
+        private int followUpCounter = 0;
+
+        private readonly ResponseBank responseBank;
+        private readonly SentimentService sentimentService;
+
+        public ConversationManager()
+        {
+            responseBank = new ResponseBank();
+            sentimentService = new SentimentService();
+        }
+
+        public List<ChatMessage> ProcessInput(string input)
+        {
+            List<ChatMessage> messages = new List<ChatMessage>();
+
+            if (string.IsNullOrWhiteSpace(input))
+                return messages;
+
+            string trimmedInput = input.Trim();
+            string message = trimmedInput.ToLower();
+
+            if (IsFirstUserNameEntry())
+            {
+                HandleNameEntry(trimmedInput, messages);
+                return messages;
+            }
+
+            AppendUserMessage(trimmedInput, messages);
+
+            if (HandleExitCommand(message, messages))
+                return messages;
+
+            if (HandleSentiment(message, trimmedInput, messages))
+                return messages;
+
+            if (HandleFollowUp(message, messages))
+                return messages;
+
+            if (HandleKeywordMessage(message, messages))
+                return messages;
+
+            ShowDefaultResponse(messages);
+            return messages;
+        }
+
+        private bool IsFirstUserNameEntry()
+        {
+            return userName == "User";
+        }
+
+        private void HandleNameEntry(string input, List<ChatMessage> messages)
+        {
+            userName = input;
+            messages.Add(new ChatMessage(userName + ": " + input, Colors.White));
+            messages.Add(new ChatMessage("Hello, " + userName + "! I'm " + botName + ".", Colors.Green));
+            messages.Add(new ChatMessage("Type a question or type 'exit/quit/bye' to end the session.", Colors.DarkCyan));
+            messages.Add(new ChatMessage(""));
+        }
+
+        private void AppendUserMessage(string input, List<ChatMessage> messages)
+        {
+            messages.Add(new ChatMessage(userName + ": " + input, Colors.White));
+        }
+
+        private bool HandleExitCommand(string message, List<ChatMessage> messages)
+        {
+            if (!IsExitCommand(message))
+                return false;
+
+            messages.Add(new ChatMessage(
+                "Bot: Goodbye, " + userName + ". Stay safe on the net! I'm always available if ever you have questions about cybersecurity & online safety.",
+                Colors.Yellow));
+
+            return true;
+        }
+
+        private bool IsExitCommand(string message)
+        {
+            return message == "exit" || message == "quit" || message == "bye" || message == "goodbye";
+        }
+
+        private bool HandleSentiment(string message, string originalMessage, List<ChatMessage> messages)
+        {
+            string sentiment = sentimentService.DetectSentiment(message);
+
+            if (string.IsNullOrEmpty(sentiment))
+                return false;
+
+            string empathetic = sentimentService.GetEmpatheticMessage(sentiment);
+            string topic = ResolveTopicFromMessage(originalMessage);
+
+            messages.Add(new ChatMessage("Bot: " + empathetic, Colors.Yellow));
+            messages.Add(new ChatMessage("Bot: " + responseBank.GetRandomResponse(topic), Colors.Yellow));
+
+            return true;
+        }
+
+        private string ResolveTopicFromMessage(string originalMessage)
+        {
+            string topic = FindMatchingTopic(originalMessage);
+
+            if (string.IsNullOrEmpty(topic))
+            {
+                if (!string.IsNullOrEmpty(favouriteTopic))
+                    topic = favouriteTopic;
+                else
+                    topic = "phishing";
+            }
+
+            return topic;
+        }
+
+        private bool HandleFollowUp(string message, List<ChatMessage> messages)
+        {
+            if (!IsFollowUpRequest(message))
+                return false;
+
+            ShowFollowUpResponse(messages);
+            return true;
+        }
+
+        private bool IsFollowUpRequest(string message)
+        {
+            string[] followUps = { "give me another", "another tip", "tell me more", "explain more", "more", "another" };
+            return followUps.Any(fu => message.Contains(fu)) && !string.IsNullOrEmpty(lastTopic);
+        }
+
+        private void ShowFollowUpResponse(List<ChatMessage> messages)
+        {
+            followUpCounter++;
+
+            if (followUpCounter > 3)
+            {
+                messages.Add(new ChatMessage(
+                    "Bot: You seem interested in this topic. Would you like to explore another area? You can ask about passwords, scams, privacy, or phishing.",
+                    Colors.Yellow));
+
+                followUpCounter = 0;
+                return;
+            }
+
+            messages.Add(new ChatMessage("Bot: " + responseBank.GetRandomResponse(lastTopic), Colors.Yellow));
+        }
+
+        private bool HandleKeywordMessage(string message, List<ChatMessage> messages)
+        {
+            string matchedTopic = FindMatchingTopic(message);
+
+            if (string.IsNullOrEmpty(matchedTopic))
+                return false;
+
+            UpdateMemoryForTopic(message, matchedTopic, messages);
+
+            messages.Add(new ChatMessage("Bot: " + responseBank.GetRandomResponse(matchedTopic), Colors.Yellow));
+            return true;
+        }
+
+        private void UpdateMemoryForTopic(string message, string matchedTopic, List<ChatMessage> messages)
+        {
+            if (message.Contains("interested in") || message.Contains("favourite") || message.Contains("favorite"))
+            {
+                favouriteTopic = matchedTopic;
+                messages.Add(new ChatMessage(
+                    "Bot: Great! I'll remember that you're interested in " + favouriteTopic + ". It's a crucial part of staying safe online.",
+                    Colors.Yellow));
+            }
+
+            lastTopic = matchedTopic;
+            followUpCounter = 0;
+        }
+
+        private string FindMatchingTopic(string message)
+        {
+            if (message.Contains("password")) return "password";
+            if (message.Contains("scam")) return "scam";
+            if (message.Contains("privacy")) return "privacy";
+            if (message.Contains("phishing")) return "phishing";
+            if (message.Contains("safety") || message.Contains("safe")) return "safety";
+            if (message.Contains("browsing") || message.Contains("link") || message.Contains("website")) return "browsing";
+
+            return "";
+        }
+
+        private void ShowDefaultResponse(List<ChatMessage> messages)
+        {
+            messages.Add(new ChatMessage(
+                "Bot: I'm not sure I understand. Can you try rephrasing? You can ask me about passwords, scams, privacy, phishing, safe browsing, and more.",
+                Colors.Yellow));
+        }
+    }
+}
