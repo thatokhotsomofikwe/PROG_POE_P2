@@ -53,10 +53,8 @@ namespace PROG_POE_P2
 
         private void ShowWelcomeMessages()
         {
-            AppendToChat("==================================================", Colors.Cyan);
             AppendToChat("Hi! Welcome to the Cybersecurity Awareness Bot.", Colors.Cyan);
             AppendToChat("I'm here to help you stay safe online.", Colors.Cyan);
-            AppendToChat("==================================================", Colors.Cyan);
             AppendToChat("");
         }
 
