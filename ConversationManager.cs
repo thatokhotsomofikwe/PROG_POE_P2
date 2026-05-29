@@ -1,6 +1,7 @@
 ﻿using PROG_POE_P2;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks.Dataflow;
 using System.Windows.Media;
 
 namespace PROG_POE_P2
@@ -49,6 +50,11 @@ namespace PROG_POE_P2
 
             if (HandleFollowUp(message, messages))
                 return messages;
+            if (message.Contains("what can i ask") || message.Contains("what can i ask you about"))
+            {
+                messages.Add(new ChatMessage("Bot: You can ask me about passwords, scams, privacy, phishing, safe browisng and more.", Colors.Yellow));
+                return messages;
+            }
 
             if (HandleKeywordMessage(message, messages))
                 return messages;
@@ -155,6 +161,8 @@ namespace PROG_POE_P2
 
             messages.Add(new ChatMessage("Bot: " + responseBank.GetRandomResponse(lastTopic), Colors.Yellow));
         }
+
+        
 
         private bool HandleKeywordMessage(string message, List<ChatMessage> messages)
         {
