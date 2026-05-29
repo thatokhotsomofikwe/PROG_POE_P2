@@ -53,8 +53,7 @@ namespace PROG_POE_P2
             string message = trimmedInput.ToLower();
 
             if (message.Contains("thank you") ||
-    message.Contains("thanks") ||
-    message.Contains("thx"))
+    message.Contains("thanks"))
             {
                 AppendUserMessage(trimmedInput, messages);
 
