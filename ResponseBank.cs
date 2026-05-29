@@ -45,13 +45,16 @@ namespace PROG_POE_P2
                 "Be mindful of what permissions you grant to apps – some may access your contacts or location unnecessarily."
             };
 
-            phishingTips.Add("Look at the sender's email address carefully – phishers often use addresses that look almost right.");
-            phishingTips.Add("Hover over links before clicking to see where they really lead.");
-            phishingTips.Add("Be suspicious of emails that create a sense of urgency, like 'Your account will be suspended!'.");
-            phishingTips.Add("Never enter your login credentials after clicking a link in an email – go to the site directly.");
-            phishingTips.Add("Check for poor grammar and spelling; many phishing attempts originate from non-native speakers.");
+            
 
-            keywordResponses["phishing"] = phishingTips;
+            keywordResponses["phishing"] = new List<string>
+            {
+            "Look at the sender's email address carefully – phishers often use addresses that look almost right.",
+            "Hover over links before clicking to see where they really lead.",
+            "Be suspicious of emails that create a sense of urgency, like 'Your account will be suspended!'.",
+            "Never enter your login credentials after clicking a link in an email – go to the site directly.",
+            "Check for poor grammar and spelling; many phishing attempts originate from non-native speakers."
+            };
 
             keywordResponses["safety"] = new List<string>
             {
