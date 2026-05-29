@@ -9,7 +9,7 @@ namespace PROG_POE_P2
     public class ConversationManager
     {
         private string userName = "User";
-        private string botName = "A.J";
+        private string botName = "Bot";
 
         private string favouriteTopic = "";
         private string lastTopic = "";
@@ -33,6 +33,17 @@ namespace PROG_POE_P2
 
             string trimmedInput = input.Trim();
             string message = trimmedInput.ToLower();
+
+            if (message.Contains("how are you"))
+            {
+                AppendUserMessage(trimmedInput, messages);
+
+                messages.Add(new ChatMessage(
+                    "Bot: I'm doing well, thank you! I'm here and ready to help you stay safe online. How are you feeling today?",
+                    Colors.Yellow));
+
+                return messages;
+            }
 
             if (IsFirstUserNameEntry())
             {

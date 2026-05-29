@@ -8,12 +8,14 @@ namespace PROG_POE_P2
         private readonly Dictionary<string, List<string>> keywordResponses;
         private readonly List<string> phishingTips;
         private readonly Random rng;
+        private readonly Dictionary<string, int> lastUsedIndexes;
 
         public ResponseBank()
         {
             rng = new Random();
             keywordResponses = new Dictionary<string, List<string>>();
             phishingTips = new List<string>();
+            lastUsedIndexes = new Dictionary<string, int>();
 
             InitResponses();
         }
@@ -66,14 +68,28 @@ namespace PROG_POE_P2
 
         public string GetRandomResponse(string topic)
         {
-            if (keywordResponses.ContainsKey(topic) && keywordResponses[topic].Count > 0)
+            if (!keywordResponses.ContainsKey(topic) || keywordResponses[topic].Count == 0)
             {
-                List<string> responses = keywordResponses[topic];
-                int index = rng.Next(responses.Count);
-                return responses[index];
+                return "I don't have a specific tip for that right now. Try asking about passwords, scams, privacy, or phishing.";
             }
 
-            return "I don't have a specific tip for that right now. Try asking about passwords, scams, privacy, or phishing.";
+            List<string> responses = keywordResponses[topic];
+
+            int newIndex;
+
+            do
+            {
+                newIndex = rng.Next(responses.Count);
+            }
+            while (
+                responses.Count > 1 &&
+                lastUsedIndexes.ContainsKey(topic) &&
+                lastUsedIndexes[topic] == newIndex
+            );
+
+            lastUsedIndexes[topic] = newIndex;
+
+            return responses[newIndex];
         }
     }
 }

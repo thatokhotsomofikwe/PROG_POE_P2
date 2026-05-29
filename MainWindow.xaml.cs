@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Media;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -79,7 +80,7 @@ namespace PROG_POE_P2
             }
         }
 
-        private void ProcessUserInput()
+        private async Task ProcessUserInput()
         {
             string input = UserInput.Text.Trim();
             UserInput.Clear();
@@ -90,6 +91,16 @@ namespace PROG_POE_P2
             foreach (ChatMessage message in conversationManager.ProcessInput(input))
             {
                 AppendToChat(message);
+            }
+            string lowerInput = input.ToLower();
+
+            if (lowerInput == "exit" ||
+                lowerInput == "quit" ||
+                lowerInput == "bye" ||
+                lowerInput == "goodbye")
+            {
+                await Task.Delay(800);
+                Application.Current.Shutdown();
             }
         }
 
