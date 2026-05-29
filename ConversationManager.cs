@@ -18,6 +18,24 @@ namespace PROG_POE_P2
         private readonly ResponseBank responseBank;
         private readonly SentimentService sentimentService;
 
+        private string GetFollowUpQuestion()
+        {
+            string[] questions =
+            {
+        "Would you like a tip on passwords, scams, privacy, or phishing?",
+        "Do you want another cybersecurity tip?",
+        "Is there anything else you're worried about online safety?",
+        "Would you like to learn how to protect your accounts better?"
+    };
+
+            Random rng = new Random();
+            return questions[rng.Next(questions.Length)];
+
+            
+        }
+
+
+
         public ConversationManager()
         {
             responseBank = new ResponseBank();
@@ -33,6 +51,33 @@ namespace PROG_POE_P2
 
             string trimmedInput = input.Trim();
             string message = trimmedInput.ToLower();
+
+            if (message.Contains("thank you") ||
+    message.Contains("thanks") ||
+    message.Contains("thx"))
+            {
+                AppendUserMessage(trimmedInput, messages);
+
+                string sentiment = sentimentService.DetectSentiment(message);
+
+                
+
+                if (sentiment == "happy")
+                {
+                    messages.Add(new ChatMessage(
+                        "Bot: You're very welcome! I'm glad you're feeling positive — keep up those good cybersecurity habits. " ,
+                        Colors.Yellow));
+                }
+                else
+                {
+                    messages.Add(new ChatMessage(
+                        "Bot: You're welcome! I'm always here if you need help staying safe online. " ,
+                        Colors.Yellow));
+                }
+
+                return messages;
+            }
+
 
             if (message.Contains("how are you"))
             {
